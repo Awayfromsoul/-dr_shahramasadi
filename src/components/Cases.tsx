@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { CASE_CATEGORIES, CASES, type CaseCategory, type CaseItem } from "../data/content";
-import { REAL_CASE } from "../data/patientCases";
+import { HAS_REAL_CASE, REAL_CASE } from "../data/patientCases";
 import { BeforeAfterSlider } from "./BeforeAfterSlider";
 import { Reveal } from "./Reveal";
 import { Container, SectionHeading } from "./ui";
@@ -10,24 +10,33 @@ import { cn } from "../utils/cn";
  * CASE 01 is the REAL patient case (2.png = BEFORE · 1.png = AFTER) and is
  * always first, so it is the default visible case as soon as the section is
  * reached — no filter selection required. It appears under «همه» and «ایمپلنت».
+ *
+ * It is included only once its photographs exist in `src/assets/cases/`
+ * (see src/data/patientCases.ts). Until then the section shows the curated
+ * placeholder plates, which are labelled as samples — a placeholder is never
+ * presented as a real patient result.
  */
 const ALL_CASES: CaseItem[] = [
-  {
-    id: REAL_CASE.id,
-    num: REAL_CASE.num,
-    title: REAL_CASE.title,
-    enTitle: REAL_CASE.enTitle,
-    category: REAL_CASE.category,
-    image: REAL_CASE.after ?? REAL_CASE.before ?? "",
-    beforeImage: REAL_CASE.before,
-    afterImage: REAL_CASE.after,
-    beforeFile: REAL_CASE.beforeFile,
-    afterFile: REAL_CASE.afterFile,
-    aspect: REAL_CASE.aspect,
-    duration: REAL_CASE.duration,
-    tags: [...REAL_CASE.tags],
-    note: REAL_CASE.note,
-  },
+  ...(HAS_REAL_CASE
+    ? ([
+        {
+          id: REAL_CASE.id,
+          num: REAL_CASE.num,
+          title: REAL_CASE.title,
+          enTitle: REAL_CASE.enTitle,
+          category: REAL_CASE.category,
+          image: REAL_CASE.after ?? REAL_CASE.before ?? "",
+          beforeImage: REAL_CASE.before,
+          afterImage: REAL_CASE.after,
+          beforeFile: REAL_CASE.beforeFile,
+          afterFile: REAL_CASE.afterFile,
+          aspect: REAL_CASE.aspect,
+          duration: REAL_CASE.duration,
+          tags: [...REAL_CASE.tags],
+          note: REAL_CASE.note,
+        },
+      ] satisfies CaseItem[])
+    : []),
   ...CASES,
 ];
 

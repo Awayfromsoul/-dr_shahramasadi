@@ -59,34 +59,93 @@ React 19 + TypeScript + Vite 7 + Tailwind CSS v4 + lucide-react + vite-plugin-si
 
 ```bash
 npm install
-npm run dev      # توسعه
-npm run build    # خروجی خودکفای dist/index.html
+npm run dev        # توسعه
+npm run images     # گزارش تصاویر — کدام فایل در کدام جایگاه نشسته است
+npm run typecheck  # بررسی تایپ‌اسکریپت
+npm run build      # خروجی خودکفای dist/index.html
 ```
 
 استقرار GitHub Pages از طریق `.github/workflows/deploy.yml` (push به `main` → build → انتشار).
 
+---
+
+## تصاویر — جایگزینی آسان + بارگذاری کاملاً محلی
+
+**راهنمای کامل: [`src/assets/README.md`](src/assets/README.md)** — جدول جایگاه‌ها در `src/data/images.ts`.
+
+### چرا بعد از `npm run build` تصاویر شکسته نمی‌شوند
+
+تمام تصاویر زیر `src/assets/` قرار دارند و از طریق باندلر Vite وارد می‌شوند. افزونه‌ی `vite-plugin-singlefile` هر ۱۳ تصویر را به‌صورت `data:` URI (base64) **داخل همان `dist/index.html`** درج می‌کند. نتیجه:
+
+- هیچ پوشه‌ی `dist/assets/` برای آپلود وجود ندارد و هیچ مسیر نسبی اشتباه نمی‌شود؛
+- هیچ درخواستی به CDN یا سرویس تصویر خارجی ارسال نمی‌شود؛
+- حتی با بازکردن مستقیم `dist/index.html` از روی دیسک (`file://`) همه‌ی تصاویر نمایش داده می‌شوند؛
+- برای GitHub Pages یا هر زیرپوشه نیازی به تنظیم `base` نیست.
+
+> ⚠️ تنها قانون: تصاویر را در `src/assets/` بگذارید، **نه** در `public/`. فایل‌های `public/` اینلاین نمی‌شوند و به‌محض باز شدن `index.html` به‌تنهایی می‌شکنند.
+
+### تغییر تصویر — بدون ویرایش کد
+
+فایل را با یکی از نام‌های پذیرفته‌شده در `src/assets/` ذخیره کنید؛ پسوند آزاد است (`.jpg` `.jpeg` `.png` `.webp` `.avif` `.gif` `.bmp`، با هر بزرگی/کوچکی حروف) و پسوند دوبل مثل `hero.jpg.png` هم شناخته می‌شود.
+
+| جایگاه | نام‌های پذیرفته‌شده (اولین تطبیق برنده است) | فایل فعلی |
+|---|---|---|
+| هیرو (پرتره) | `hero` → `doctor-hero-luxury` → `doctor-hero` → `doctor-portrait` → `portrait` | `doctor-hero-luxury.jpg` |
+| ۰۲ درباره — پرتره اصلی | `about` → `doctor-consultation-luxury` → `doctor-consultation` | `doctor-consultation-luxury.jpg` |
+| ۰۲ درباره — پرتره دوم | `about-alt` → `doctor-about` → `doctor-about-alt` | `doctor-about.jpg` |
+| ماکرو ایمپلنت | `implant-macro` → `implant-macro-gold` → `implant-fixture` | `implant-macro-gold.jpg` |
+| مدل فک و ایمپلنت | `implant-model` → `implant-jaw-model` | `implant-model.jpg` |
+| ۰۶ موقعیت — محیط مطب | `clinic` → `office` → `practice` → `clinic-interior` | `clinic.jpg` |
+| ایمپلنت دیجیتال | `digital-plan` → `digital-implant` → `digital-planning` | `digital-plan.jpg` |
+| جراحی لثه | `gum` → `periodontal` → `gum-surgery` → `soft-tissue` | `gum.jpg` |
+| نمونه‌کار / اینستاگرام | `case-model` → `case` → `restored-arch` | `case-model.jpg` |
+
+```bash
+# نمونه: تعویض پرتره‌ی هیرو بدون دست‌زدن به کد
+cp ~/Desktop/new-portrait.png src/assets/hero.png
+npm run images   # تأیید می‌کند doctorHero حالا hero.jpg/png است
+```
+
+### پوشه‌های «فقط فایل را بیندازید»
+
+| پوشه | بخش | رفتار |
+|---|---|---|
+| `src/assets/gallery/` | گالری تصاویر کلینیکی | با اولین تصویر، نمونه‌ها و یادداشت «تصاویر فوق نمونه هستند» جای خود را به تصاویر واقعی می‌دهند. `captions.json` برچسب/alt/دسته فارسی می‌دهد. |
+| `src/assets/instagram/` | ۰۵ اینستاگرام | گرید خودکار پر می‌شود — بدون API و بدون توکن. `captions.json` می‌تواند لینک مستقیم هر پست را بدهد. |
+| `src/assets/cases/` | ۰۴ نمونه‌کارها | `2.*` = قبل · `1.*` = بعد (نگاشت قفل‌شده). تا فایل واقعی نباشد، CASE 01 نمایش داده نمی‌شود. |
+| `src/assets/certificates/` | مدارک حرفه‌ای | نام فایل باید با `certificate-0N-…` شروع شود؛ پسوند آزاد و دوبل قابل قبول. |
+
+### اگر تصویری پیدا نشود
+
+هیچ‌وقت آیکون تصویر شکسته ظاهر نمی‌شود: یک قاب طلایی تولیدشده به‌صورت محلی نمایش داده می‌شود که نام فایل موردنیاز را می‌نویسد. `npm run images` آن جایگاه‌ها را قرمز چاپ می‌کند و کد خروج غیرصفر می‌دهد تا بتوان در CI جلوی استقرار را گرفت.
+
+### حجم فایل
+
+درج base64 حدود ۳۳٪ به حجم اضافه می‌کند و همه‌چیز در یک سند HTML می‌نشیند (خروجی فعلی ≈ ۴٫۹ مگابایت که ۲٫۱ مگابایت آن سه اسکن گواهی است). توصیه: پرتره‌ها ≤ ۱۶۰۰px با کیفیت ۷۸، گالری/اینستاگرام ≤ ۱۰۸۰–۱۴۰۰px، گواهی‌ها در حد خوانا بودن مهر و امضا.
+
 ## مدارک و مجوزهای حرفه‌ای (بخش ۰۵) — سه گواهی واقعی
 
-سه تصویر اصلی گواهی‌های ارائه‌شده را با همین نام‌ها در `src/assets/certificates/` ذخیره کنید (راهنمای کامل در `README.md` همان پوشه):
+سه تصویر اصلی گواهی‌های ارائه‌شده را در `src/assets/certificates/` ذخیره کنید. نام فایل باید با **نام پایه** زیر شروع شود؛ پسوند آزاد است و پسوند دوبل هم پذیرفته می‌شود (راهنمای کامل در `README.md` همان پوشه):
 
-| # | فایل | سند |
-|---|---|---|
-| 01 | `certificate-01-laser-fellowship.jpg` | Certificate of Attendance — Laser Dentistry Fellowship Course (Vicenza, Italy, June 2017 — Università degli Studi di Genova / Doctor Smile) |
-| 02 | `certificate-02-restorative-congress.jpg` | گواهی شرکت در سمینارها و کنگره‌ها — دهمین کنگره انجمن متخصصین دندانپزشکی ترمیمی ایران (۱۲–۱۴ آبان ۱۳۸۹) |
-| 03 | `certificate-03-scientific-conference.jpg` | گواهی شرکت در کنفرانس‌های علمی — دانشگاه علوم پزشکی لرستان (۱۳۸۲/۱/۲۸) |
+| # | نام پایه | سند | فایل فعلی |
+|---|---|---|---|
+| 01 | `certificate-01-laser-fellowship` | Certificate of Attendance — Laser Dentistry Fellowship Course (Vicenza, Italy, June 2017 — Università degli Studi di Genova / Doctor Smile) | `certificate-01-laser-fellowship.jpg.png` |
+| 02 | `certificate-02-restorative-congress` | گواهی شرکت در سمینارها و کنگره‌ها — دهمین کنگره انجمن متخصصین دندانپزشکی ترمیمی ایران (۱۲–۱۴ آبان ۱۳۸۹) | `certificate-02-restorative-congress.jpg.png` |
+| 03 | `certificate-03-scientific-conference` | گواهی شرکت در کنفرانس‌های علمی — دانشگاه علوم پزشکی لرستان (۱۳۸۲/۱/۲۸) | `certificate-03-scientific-conference.jpg.png` |
 
 - هر گواهی بلوک اختصاصی خود را دارد: شماره → عنوان → برچسب انگلیسی → توضیح دقیق → **تصویر اصلی سند** (توضیح همیشه بالای تصویر).
 - عناوین دقیقاً بر اساس متن خوانای هر سند نوشته شده‌اند؛ گواهی حضور به‌عنوان «مدرک دانشگاهی» معرفی نشده است.
-- فایل‌ها به‌صورت خودکار (via `import.meta.glob`) بارگذاری می‌شوند؛ تا زمانی که فایل قرار نگیرد، بلوک مربوطه وضعیت «فایل موجود نیست» را نشان می‌دهد — هرگز تصویر جعلی نمایش داده نمی‌شود.
+- فایل‌ها به‌صورت خودکار توسط `src/data/images.ts` پیدا و **به‌صورت محلی داخل `dist/index.html` درج** می‌شوند. تطبیق نام، هر پسوندی را (حتی `.jpg.png`) حذف می‌کند و بزرگی/کوچکی حروف، فاصله و `_` را نادیده می‌گیرد — به همین دلیل اسکن‌های موجود در مخزن اکنون درست نمایش داده می‌شوند. تا زمانی که فایل قرار نگیرد، بلوک مربوطه وضعیت «فایل موجود نیست» را نشان می‌دهد — هرگز تصویر جعلی نمایش داده نمی‌شود.
 - کلیک روی هر سند → لایت‌باکس تمام‌صفحه با قاب طلایی، بزرگ‌نمایی، پشتیبانی کیبورد و سوایپ موبایل.
 
 ## ⚠️ جایگزینی تصاویر و مدارک (مهم)
 
 **Placeholder medical imagery must be replaced with real patient images obtained with appropriate consent.**
 
-- پرتره‌های دکتر، تصاویر کلینیکی و صفحات قبل/بعد فعلاً **نمونه (placeholder)** هستند (`src/assets/`).
-- گالری مدارک (`src/components/Credentials.tsx`) از صفحات جایگزین طراحی‌شده استفاده می‌کند؛ اسکن واقعی هر مدرک (بورد، فلوشیپ لیزر جنوا، گواهی تخصص، گواهینامه دوره‌ها) را جایگزین کنید.
+- پرتره‌های دکتر، تصاویر کلینیکی و صفحات قبل/بعد فعلاً **نمونه (placeholder)** هستند (`src/assets/`). برای تعویض هرکدام کافی است فایل جدید را با نام پذیرفته‌شده در همان پوشه بگذارید — بخش «تصاویر» همین فایل را ببینید.
+- بخش مدارک (`src/components/ProfessionalLicenses.tsx`) سه گواهی **واقعی** ارائه‌شده توسط مطب را نمایش می‌دهد؛ برای افزودن مدرک دیگر (بورد، گواهی تخصص، گواهینامه دوره‌ها) یک رکورد در `src/data/certificates.ts` اضافه کنید و تصویر را در `src/assets/certificates/` بگذارید.
 - هیچ تصویر بیمار جعلی تولید نشده و نتایج درمان دستکاری نشده‌اند.
+- تا زمانی که `1.*` و `2.*` در `src/assets/cases/` قرار نگیرند، CASE 01 در بخش نمونه‌کارها نمایش داده نمی‌شود — هیچ صفحه‌ی نمونه‌ای به‌جای نتیجه‌ی واقعی بیمار جا نمی‌زند.
 
 ## اخلاق پزشکی
 
