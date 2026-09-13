@@ -1,0 +1,170 @@
+@import "tailwindcss";
+
+/* ============================================================
+   DR. SHAHRAM ASADI — Luxury Editorial Black & Gold Identity
+   Palette:
+     Primary background:   #070707
+     Secondary background: #0D0D0D
+     Surface:              #111111
+     Primary text:         #F5F2EA (warm ivory)
+     Secondary text:       #A7A39A (muted sand)
+     Champagne gold:       #D4AF37
+     Bright champagne:     #E6C766
+     Gold border:          rgba(212, 175, 55, 0.28)
+   Ratio: ~75% black / 20% ivory / 5% gold (accent only)
+   ============================================================ */
+
+@theme {
+  --color-black-pure: #070707;
+  --color-black-deep: #0d0d0d;
+  --color-surface: #111111;
+  --color-ivory: #f5f2ea;
+  --color-sand: #a7a39a;
+  --color-gold: #d4af37;
+  --color-gold-bright: #e6c766;
+
+  --font-sans: "Vazirmatn", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: "Playfair Display", "Cormorant Garamond", Georgia, serif;
+}
+
+@layer base {
+  html {
+    overflow-x: clip;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    background-color: #070707;
+    color: #f5f2ea;
+  }
+
+  body {
+    background-color: #070707;
+    color: #f5f2ea;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* 16px inputs prevent iOS auto-zoom */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  img {
+    user-select: none;
+  }
+
+  ::selection {
+    background: #d4af37;
+    color: #070707;
+  }
+
+  /* Visible, on-brand focus states */
+  :focus-visible {
+    outline: 1px solid #d4af37;
+    outline-offset: 3px;
+  }
+
+  /* Thin luxury scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #070707;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #242424;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #d4af37;
+  }
+}
+
+/* ------ motion (calm, cinematic) ------ */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-fade-in {
+  animation: fade-in 0.5s ease both;
+}
+
+/* Hairline dividers */
+.gold-hairline {
+  height: 1px;
+  background: linear-gradient(
+    to left,
+    transparent,
+    rgba(212, 175, 55, 0.35) 20%,
+    rgba(212, 175, 55, 0.5) 50%,
+    rgba(212, 175, 55, 0.35) 80%,
+    transparent
+  );
+}
+
+/* ------ fluid responsive helpers (viewport-driven, not breakpoint-driven) ------ */
+
+/* Oversized faint background numerals (Cases / Journey / Credentials / etc.) */
+.ghost-num {
+  font-size: clamp(6rem, 17vw, 20rem);
+  line-height: 0.85;
+}
+
+/* Hero English display name — fluid between 320px and large desktop */
+.hero-name-en {
+  font-size: clamp(1.55rem, 1rem + 2.7vw, 3.75rem);
+  line-height: 1.18;
+}
+
+/* Hero Persian name — fluid */
+.hero-name-fa {
+  font-size: clamp(1.6rem, 1.1rem + 2vw, 3rem);
+  line-height: 1.35;
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ------ reduced motion ------ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
