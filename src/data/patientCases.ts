@@ -12,29 +12,46 @@
    recolouring — only responsive sizing, aspect-ratio reservation and lazy
    loading. The container ratio matches the source (4:3) so nothing clinical
    is cropped away.
+
+   ▸ TO ADD / CHANGE THESE PICTURES
+     Drop them into `src/assets/cases/`. `2.*` and `1.*` are the locked names,
+     but these friendlier aliases are accepted too and mean exactly the same
+     thing — BEFORE stays BEFORE, AFTER stays AFTER:
+
+        BEFORE :  2.png · 2.jpg · before.png · case-01-before.jpg · case-before.*
+        AFTER  :  1.png · 1.jpg · after.png  · case-01-after.jpg  · case-after.*
+
+     Any extension works (.jpg .jpeg .png .webp .avif), in any letter case, and
+     doubled extensions such as `2.jpg.png` are matched too — the shared image
+     system (src/data/images.ts) strips every extension before comparing.
+     Until at least one of the two exists, CASE 01 is left out of the section
+     rather than showing a broken frame or a fake result.
    ============================================================================ */
 
-const files = import.meta.glob<string>(
-  "../assets/cases/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}",
-  { eager: true, import: "default" }
-);
+import { findFirstImage, type ImageEntry } from "./images";
 
-function resolve(name: string): string | undefined {
-  const key = Object.keys(files).find(
-    (k) => (k.split("/").pop() ?? "").toLowerCase() === name.toLowerCase()
-  );
-  return key ? files[key] : undefined;
+const CASE_FOLDERS = ["cases", "*"];
+
+/** Locked names first, then the friendly aliases. Order = priority. */
+const BEFORE_NAMES = ["2", "before", "case-01-before", "case-before", "before-2"];
+const AFTER_NAMES = ["1", "after", "case-01-after", "case-after", "after-1"];
+
+function resolve(names: string[]): ImageEntry | undefined {
+  return findFirstImage(names, CASE_FOLDERS);
 }
+
+const beforeEntry = resolve(BEFORE_NAMES);
+const afterEntry = resolve(AFTER_NAMES);
 
 export const REAL_CASE = {
   id: "real-case-01",
   num: "01",
   /* 2.png = BEFORE (locked) */
-  before: resolve("2.png"),
-  beforeFile: "2.png",
+  before: beforeEntry?.src,
+  beforeFile: beforeEntry?.fileName ?? "2.png",
   /* 1.png = AFTER (locked) */
-  after: resolve("1.png"),
-  afterFile: "1.png",
+  after: afterEntry?.src,
+  afterFile: afterEntry?.fileName ?? "1.png",
   title: "بازسازی پروتز ایمپلنت‌پایه",
   enTitle: "IMPLANT-SUPPORTED PROSTHESIS",
   category: "ایمپلنت" as const,
@@ -45,3 +62,10 @@ export const REAL_CASE = {
   /* Source ratio is 4:3 — kept identical so the clinical area is never cropped. */
   aspect: "aspect-[4/3]",
 };
+
+/**
+ * `true` only when the real photographs are actually on disk.
+ * The Selected Cases section uses this so it never presents a placeholder plate
+ * as a real patient result.
+ */
+export const HAS_REAL_CASE = Boolean(REAL_CASE.before || REAL_CASE.after);

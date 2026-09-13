@@ -140,13 +140,26 @@ export function ProfessionalLicenses() {
                           <p className="max-w-md min-w-0 text-xs leading-relaxed break-words text-[#A7A39A]">
                             تصویر اصلی ارائه‌شده را با نام{" "}
                             <code dir="ltr" className="break-all text-[#D4AF37]">
-                              {c.file}.jpg
+                              {c.file}
                             </code>{" "}
-                            در مسیر{" "}
+                            و هر پسوند دلخواه (
+                            <code dir="ltr" className="text-[#D4AF37]">
+                              .jpg
+                            </code>
+                            ،
+                            <code dir="ltr" className="text-[#D4AF37]">
+                              .png
+                            </code>
+                            ،
+                            <code dir="ltr" className="text-[#D4AF37]">
+                              .webp
+                            </code>
+                            ) در مسیر{" "}
                             <code dir="ltr" className="break-all text-[#D4AF37]">
                               src/assets/certificates/
                             </code>{" "}
-                            ذخیره کنید؛ این بلوک به‌صورت خودکار سند واقعی را نمایش می‌دهد.
+                            ذخیره کنید؛ این بلوک به‌صورت خودکار سند واقعی را نمایش
+                            می‌دهد.
                           </p>
                         </div>
                       )}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   GALLERY_CATEGORIES,
   GALLERY_ITEMS,
+  HAS_CUSTOM_GALLERY,
   type GalleryCategory,
 } from "../data/content";
 import { Lightbox, type LightboxSlide } from "./Lightbox";
@@ -94,10 +95,19 @@ export function ClinicalGallery() {
           ))}
         </div>
 
-        <p className="mt-8 text-center text-[11px] leading-relaxed text-[#A7A39A]/70">
-          تصاویر فوق نمونه هستند و با تصاویر واقعی کلینیکی ارائه‌شده توسط مطب
-          جایگزین می‌شوند.
-        </p>
+        {/* The "these are samples" disclaimer applies only to the placeholder
+            plates — once real images are dropped into src/assets/gallery/ the
+            grid shows supplied clinical photography and the note is removed. */}
+        {HAS_CUSTOM_GALLERY ? (
+          <p className="mt-8 text-center text-[11px] leading-relaxed text-[#A7A39A]/70">
+            تصاویر کلینیکی ارائه‌شده توسط مطب دکتر شهرام اسعدی.
+          </p>
+        ) : (
+          <p className="mt-8 text-center text-[11px] leading-relaxed text-[#A7A39A]/70">
+            تصاویر فوق نمونه هستند و با تصاویر واقعی کلینیکی ارائه‌شده توسط مطب
+            جایگزین می‌شوند.
+          </p>
+        )}
       </Container>
 
       {lightbox !== null && (

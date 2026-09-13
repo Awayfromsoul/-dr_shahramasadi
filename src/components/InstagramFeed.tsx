@@ -1,16 +1,47 @@
 import { IMG, INSTAGRAM_HANDLE, INSTAGRAM_URL } from "../data/content";
+import { captionFor, folderImages } from "../data/images";
 import { InstagramIcon } from "./icons";
 import { Reveal } from "./Reveal";
 import { Arrow, Container, SectionHeading } from "./ui";
 
-const POSTS = [
-  { src: IMG.doctorHero, alt: "دکتر شهرام اسعدی — متخصص لثه و ایمپلنت" },
-  { src: IMG.implantMacro, alt: "فیکسچر دقیق ایمپلنت تیتانیومی" },
-  { src: IMG.caseModel, alt: "بازسازی قوس دندانی روی مدل ایمپلنت" },
-  { src: IMG.digitalPlan, alt: "برنامه‌ریزی سه‌بعدی دیجیتال فک" },
-  { src: IMG.gum, alt: "درمان تخصصی بافت لثه" },
-  { src: IMG.clinic, alt: "محیط مطب دکتر شهرام اسعدی" },
+/* ── INSTAGRAM PICTURES ─────────────────────────────────────────────────────
+   ▸ DROP FOLDER: `src/assets/instagram/`
+     Save screenshots of real posts there and this grid fills itself — the
+     samples below are used only while that folder is empty.
+     Optional `src/assets/instagram/captions.json` adds Persian alt text and a
+     permalink for each post:
+
+       { "post-01.jpg": { "alt": "کیس ایمپلنت…",
+                          "href": "https://www.instagram.com/p/…" } }
+
+   Every image is bundled locally, so the grid keeps working after
+   `npm run build` with no Instagram API, token or remote request.
+   ──────────────────────────────────────────────────────────────────────── */
+interface Post {
+  src: string;
+  alt: string;
+  href: string;
+}
+
+const SAMPLE_POSTS: Post[] = [
+  { src: IMG.doctorHero, alt: "دکتر شهرام اسعدی — متخصص لثه و ایمپلنت", href: INSTAGRAM_URL },
+  { src: IMG.implantMacro, alt: "فیکسچر دقیق ایمپلنت تیتانیومی", href: INSTAGRAM_URL },
+  { src: IMG.caseModel, alt: "بازسازی قوس دندانی روی مدل ایمپلنت", href: INSTAGRAM_URL },
+  { src: IMG.digitalPlan, alt: "برنامه‌ریزی سه‌بعدی دیجیتال فک", href: INSTAGRAM_URL },
+  { src: IMG.gum, alt: "درمان تخصصی بافت لثه", href: INSTAGRAM_URL },
+  { src: IMG.clinic, alt: "محیط مطب دکتر شهرام اسعدی", href: INSTAGRAM_URL },
 ];
+
+const DROPPED_POSTS: Post[] = folderImages("instagram").map((entry) => {
+  const caption = captionFor(entry);
+  return {
+    src: entry.src,
+    alt: caption.alt?.trim() || caption.label?.trim() || `پست اینستاگرام ${entry.fileName}`,
+    href: caption.href?.trim() || INSTAGRAM_URL,
+  };
+});
+
+const POSTS: Post[] = DROPPED_POSTS.length ? DROPPED_POSTS : SAMPLE_POSTS;
 
 export function InstagramFeed() {
   return (
@@ -42,9 +73,9 @@ export function InstagramFeed() {
         {/* Editorial grid — each post links to the real profile */}
         <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
           {POSTS.map((p, i) => (
-            <Reveal key={i} delay={i * 60}>
+            <Reveal key={`${p.src}-${i}`} delay={i * 60}>
               <a
-                href={INSTAGRAM_URL}
+                href={p.href}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group relative block aspect-square overflow-hidden border border-white/10 bg-[#0D0D0D] transition-all duration-300 hover:border-[#D4AF37]"

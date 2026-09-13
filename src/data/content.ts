@@ -5,23 +5,40 @@
    Placeholder medical imagery must be replaced with real patient images
    obtained with appropriate consent. Real supplied assets (doctor portraits,
    clinical photography, Before/After material, certificates, Instagram
-   screenshots) take absolute priority — drop them into src/assets/ and update
-   the imports below. Do NOT generate fake patient results.
+   screenshots) take absolute priority. Do NOT generate fake patient results.
+
+   ▸ HOW TO CHANGE A PICTURE — see src/data/images.ts and src/assets/README.md.
+     Drop your file into src/assets/ with an accepted name; there is no import
+     to edit in this file any more. Every picture is bundled locally, so the
+     built site never depends on a remote URL or on files next to index.html.
 
    CLAIM DISCIPLINE:
    Only the client-approved wording "+5000 ایمپلنت موفق از سال ۱۳۸۷" is used.
    The separate "۲۰ هزار واحد ایمپلنت" material is NOT merged with it.
    ============================================================================ */
 
-import doctorHero from "../assets/doctor-hero-luxury.jpg";
-import doctorAbout from "../assets/doctor-consultation-luxury.jpg";
-import doctorAboutAlt from "../assets/doctor-about.jpg";
-import implantMacro from "../assets/implant-macro-gold.jpg";
-import implantModel from "../assets/implant-model.jpg";
-import clinic from "../assets/clinic.jpg";
-import digitalPlan from "../assets/digital-plan.jpg";
-import gum from "../assets/gum.jpg";
-import caseModel from "../assets/case-model.jpg";
+import { captionFor, folderImages, IMAGES } from "./images";
+
+/** `1` → `۱` — used for auto-numbered gallery labels. */
+const PERSIAN_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
+function toPersianDigits(value: number | string): string {
+  return String(value).replace(/[0-9]/g, (d) => PERSIAN_DIGITS[Number(d)]);
+}
+
+/* Every picture used below comes from the local image system. The names are
+   kept identical to the old static imports so the rest of this file — and every
+   component reading `IMG.*` — is unchanged. */
+const {
+  doctorHero,
+  doctorAbout,
+  doctorAboutAlt,
+  implantMacro,
+  implantModel,
+  clinic,
+  digitalPlan,
+  gum,
+  caseModel,
+} = IMAGES;
 
 /* ------------------------------ CONTACT ------------------------------- */
 /* FINAL OFFICIAL CONTACT DATA — the only phone numbers used anywhere on the
@@ -62,6 +79,10 @@ export const APPROVED_CLAIM = {
   since: "از سال ۱۳۸۷",
 };
 
+/**
+ * Pictures for the whole site — always local, always defined.
+ * To swap one, replace the file in `src/assets/` (see src/data/images.ts).
+ */
 export const IMG = {
   doctorHero,
   doctorAbout,
@@ -73,6 +94,9 @@ export const IMG = {
   gum,
   caseModel,
 };
+
+/* Re-exported so components can import either `IMG` or `IMAGES`. */
+export { IMAGES, RESOLVED_SLOTS, type ImageKey } from "./images";
 
 /* ------------------------------- NAV ---------------------------------- */
 export const NAV = [
@@ -366,8 +390,53 @@ export interface GalleryItem {
   tall?: boolean;
 }
 
-/* Placeholder clinical photography — replace with real supplied images. */
-export const GALLERY_ITEMS: GalleryItem[] = [
+/* ── GALLERY PICTURES ───────────────────────────────────────────────────────
+   ▸ DROP FOLDER: `src/assets/gallery/`
+     Every image saved there appears in this gallery automatically — no code
+     edit needed. Add `src/assets/gallery/captions.json` to give each one a
+     Persian label, alt text and category:
+
+       { "implant-01.jpg": { "label": "جراحی ایمپلنت",
+                             "alt": "…",
+                             "category": "Implant Surgery" } }
+
+     While that folder is empty the curated sample plates below are used, and
+     the section keeps its "these are samples" footnote.
+   ──────────────────────────────────────────────────────────────────────── */
+const GALLERY_DROP_FOLDER = folderImages("gallery");
+
+/** `true` once real images have been dropped into `src/assets/gallery/`. */
+export const HAS_CUSTOM_GALLERY = GALLERY_DROP_FOLDER.length > 0;
+
+const DEFAULT_GALLERY_CATEGORY: Exclude<GalleryCategory, "همه"> = "Clinical Experience";
+
+function isGalleryCategory(value: unknown): value is Exclude<GalleryCategory, "همه"> {
+  return (
+    typeof value === "string" &&
+    value !== "همه" &&
+    (GALLERY_CATEGORIES as string[]).includes(value)
+  );
+}
+
+const CUSTOM_GALLERY: GalleryItem[] = GALLERY_DROP_FOLDER.map((entry, i) => {
+  const caption = captionFor(entry);
+  const label = caption.label?.trim() || `تصویر کلینیکی ${toPersianDigits(i + 1)}`;
+  return {
+    id: `gallery-${entry.slug || i}`,
+    src: entry.src,
+    category: isGalleryCategory(caption.category)
+      ? caption.category
+      : DEFAULT_GALLERY_CATEGORY,
+    faLabel: label,
+    alt: caption.alt?.trim() || `${label} — مطب دکتر شهرام اسعدی`,
+    /* Alternate the plate height so the masonry column layout keeps its rhythm. */
+    tall: i % 2 === 0,
+  };
+});
+
+/* Placeholder clinical photography — replace by dropping files into
+   src/assets/gallery/ (see above) or by editing this list. */
+const CURATED_GALLERY: GalleryItem[] = [
   {
     id: "g1",
     src: implantModel,
@@ -421,6 +490,11 @@ export const GALLERY_ITEMS: GalleryItem[] = [
     alt: "دکتر شهرام اسعدی در حال بررسی تصاویر درمان",
   },
 ];
+
+/** What `ClinicalGallery.tsx` renders — dropped-in images win over the samples. */
+export const GALLERY_ITEMS: GalleryItem[] = HAS_CUSTOM_GALLERY
+  ? CUSTOM_GALLERY
+  : CURATED_GALLERY;
 
 /* --------------------------- PATIENT JOURNEY ------------------------------ */
 export const JOURNEY = [

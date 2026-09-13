@@ -3,21 +3,31 @@
    ----------------------------------------------------------------------------
    Titles/descriptions below are written ONLY from text visibly readable on the
    uploaded documents. Attendance certificates are described as attendance —
-   never as degrees. Save the original files in src/assets/certificates/ using
-   the filenames listed in `file` (see README.md there).
+   never as degrees.
+
+   ▸ TO CHANGE / ADD A CERTIFICATE IMAGE
+     Save it into `src/assets/certificates/`. The file name must START with the
+     `file` value below (e.g. `certificate-01-laser-fellowship`); the extension
+     is free and may even be doubled, so all of these work identically:
+
+        certificate-01-laser-fellowship.jpg
+        certificate-01-laser-fellowship.png
+        certificate-01-laser-fellowship.jpg.png   ← what is shipped today
+        Certificate 01 Laser Fellowship.JPG
+
+     Matching is done by the shared local image system (src/data/images.ts),
+     which strips every extension and ignores case, spaces and underscores —
+     that is why the doubled `.jpg.png` names resolve correctly after
+     `npm run build` instead of showing the "file missing" state.
    ============================================================================ */
 
-const files = import.meta.glob<string>(
-  "../assets/certificates/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG}",
-  { eager: true, import: "default" }
-);
+import { findImage } from "./images";
+
+/** Certificates live in their own folder; `*` is the safety net. */
+const CERTIFICATE_FOLDERS = ["certificates", "*"];
 
 function resolve(baseName: string): string | undefined {
-  const key = Object.keys(files).find((k) => {
-    const name = k.split("/").pop() ?? "";
-    return name.replace(/\.[^.]+$/, "").toLowerCase() === baseName.toLowerCase();
-  });
-  return key ? files[key] : undefined;
+  return findImage(baseName, CERTIFICATE_FOLDERS)?.src;
 }
 
 export interface Certificate {
