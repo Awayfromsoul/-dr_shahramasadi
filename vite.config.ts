@@ -41,4 +41,11 @@ export default defineConfig({
        if you serve `npm run dev` through one. */
     allowedHosts: [".e2b.app", "localhost"],
   },
+  preview: {
+    /* `npm run preview` serves the built dist/index.html — the real check that
+       every picture survived `npm run build` as an inlined local asset. */
+    host: true,
+    port: 4173,
+    allowedHosts: [".e2b.app", "localhost"],
+  },
 });
